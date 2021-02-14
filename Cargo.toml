@@ -12,3 +12,4 @@ ureq = { version = "*", features = ["json"] }
 serde = "*"
 serde_derive = "*"
 serde_json = "*"
+termion = "*"

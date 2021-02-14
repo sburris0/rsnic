@@ -5,7 +5,9 @@ use clap::{App, Arg, SubCommand};
 use ureq;
 use serde_json::from_str;
 use std::io;
+use std::io::Write;
 use std::process::Command;
+use termion::{color, style};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -31,7 +33,6 @@ fn main() {
         .get_matches();
 
     if let Some(query) = matches.subcommand_matches("search").unwrap().value_of("query") {
-        println!("Searching for \"{}\"...", query);
         let req_url = format!("https://invidious.snopyta.org/api/v1/search?q={}", query);
 
         let search_result_string: String = ureq::get(&req_url)
@@ -41,12 +42,19 @@ fn main() {
 
         let videos: Vec<Video> = from_str(&search_result_string).unwrap();
 
+        println!("{}{}Item\t Title{}", style::Bold, color::Fg(color::Yellow), style::Reset);
         for (i, video) in videos.iter().enumerate() {
-            println!("{}. {}", i+1, video.title)
+            if i % 2 == 0 {
+                println!("{}{}\t{}", color::Fg(color::Green), i+1, video.title);
+            }
+            else {
+                println!("{}{}\t{}", color::Fg(color::Blue), i+1, video.title);
+            }
         }
 
         let mut video_number = String::new();
-        println!("\nEnter video number: ");
+        print!("{}\nItem: {}", color::Fg(color::Yellow), color::Fg(color::Reset));
+        io::stdout().flush().expect("Could not flush output");
         io::stdin().read_line(&mut video_number).expect("Could not read input");
 
         let selected_video = &videos[video_number.trim().parse::<usize>().expect("Could not parse input") - 1];
