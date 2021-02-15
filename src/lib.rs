@@ -1,8 +1,8 @@
 use serde::Deserialize;
 use serde_json::from_str;
 use std::fmt;
-use std::io;
-use std::io::Write;
+use std::io::{self, Write};
+use std::error::Error;
 use std::process::Command;
 use termion::{color, style};
 
@@ -26,33 +26,37 @@ impl fmt::Display for Video {
 }
 
 /// Returns the videos found by searching for `query`
-pub fn search(url: &str) -> Result<Vec<Video>, ureq::Error> {
+pub fn search(url: &str) -> Result<Vec<Video>, Box<dyn Error>> {
     // TODO: pass config containing URL?
     let search_result_string: String = ureq::get(&url)
         .set("User-Agent", "Mozilla/5.0")
         .call()?
         .into_string()?;
 
-    let videos: Vec<Video> = from_str(&search_result_string).unwrap();
-    Ok(videos)
+    Ok(from_str(&search_result_string)?)
 }
 
 /// Displays a list of videos
-pub fn print_videos(videos: &[Video]) {
+pub fn print_videos(videos: &[Video]) -> Result<(), Box<dyn Error>> {
     // TODO: option to turn off color
-    println!(
+    let mut writer = io::BufWriter::new(io::stdout());
+
+    writeln!(writer,
         "{}{}Item\t Title{}",
         style::Bold,
         color::Fg(color::Yellow),
         style::Reset
-    );
+    )?;
     for (i, video) in videos.iter().enumerate() {
         if i % 2 == 0 {
-            println!("{}{}\t{}", color::Fg(color::Green), i + 1, video);
+            writeln!(writer, "{}{}\t{}", color::Fg(color::Green), i + 1, video)?;
         } else {
-            println!("{}{}\t{}", color::Fg(color::Blue), i + 1, video);
+            writeln!(writer, "{}{}\t{}", color::Fg(color::Blue), i + 1, video)?;
         }
     }
+
+    writer.flush()?;
+    Ok(())
 }
 
 /// Selects a video

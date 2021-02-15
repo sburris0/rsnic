@@ -28,7 +28,7 @@ fn main() {
         let req_url = format!("https://invidious.snopyta.org/api/v1/search?q={}", query);
         let videos: Vec<Video> =
             search(&req_url).expect("An error occurred, no videos were found.");
-        print_videos(&videos);
+        print_videos(&videos).expect("Could not display videos");
 
         let selected_url = select_video(&videos);
         play(&selected_url);
