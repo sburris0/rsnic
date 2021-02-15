@@ -1,10 +1,28 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use std::fmt;
 use std::io::{self, Write};
 use std::error::Error;
 use std::process::Command;
 use termion::{color, style};
+
+/// Contains configuration options
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Config {
+    instance: String,
+    player: String,
+    results: u8,
+}
+
+impl std::default::Default for Config {
+    fn default() -> Self {
+        Self {
+            instance: "https://invidious.snopyta.org".to_string(),
+            player: "mpv".to_string(),
+            results: 20,
+        }
+    }
+}
 
 /// Video type that API responses are parsed into
 /// The Invidious API is documented [here](https://github.com/iv-org/documentation/blob/master/API.md).
@@ -26,8 +44,8 @@ impl fmt::Display for Video {
 }
 
 /// Returns the videos found by searching for `query`
-pub fn search(url: &str) -> Result<Vec<Video>, Box<dyn Error>> {
-    // TODO: pass config containing URL?
+pub fn search(cfg: &Config, query: &str) -> Result<Vec<Video>, Box<dyn Error>> {
+    let url = format!("{}/api/v1/search?q={}", cfg.instance, query);
     let search_result_string: String = ureq::get(&url)
         .set("User-Agent", "Mozilla/5.0")
         .call()?
@@ -37,8 +55,7 @@ pub fn search(url: &str) -> Result<Vec<Video>, Box<dyn Error>> {
 }
 
 /// Displays a list of videos
-pub fn print_videos(videos: &[Video]) -> Result<(), Box<dyn Error>> {
-    // TODO: option to turn off color
+pub fn print_videos(cfg: &Config, videos: &[Video]) -> Result<(), Box<dyn Error>> {
     let mut writer = io::BufWriter::new(io::stdout());
 
     writeln!(writer,
@@ -48,10 +65,12 @@ pub fn print_videos(videos: &[Video]) -> Result<(), Box<dyn Error>> {
         style::Reset
     )?;
     for (i, video) in videos.iter().enumerate() {
-        if i % 2 == 0 {
-            writeln!(writer, "{}{}\t{}", color::Fg(color::Green), i + 1, video)?;
-        } else {
-            writeln!(writer, "{}{}\t{}", color::Fg(color::Blue), i + 1, video)?;
+        if i < cfg.results as usize {
+            if i % 2 == 0 {
+                writeln!(writer, "{}{}\t{}", color::Fg(color::Green), i + 1, video)?;
+            } else {
+                writeln!(writer, "{}{}\t{}", color::Fg(color::Blue), i + 1, video)?;
+            }
         }
     }
 
@@ -60,7 +79,7 @@ pub fn print_videos(videos: &[Video]) -> Result<(), Box<dyn Error>> {
 }
 
 /// Selects a video
-pub fn select_video(videos: &[Video]) -> String {
+pub fn select_video(cfg: &Config, videos: &[Video]) -> String {
     let mut video_number = String::new();
 
     print!(
@@ -79,16 +98,16 @@ pub fn select_video(videos: &[Video]) -> String {
         .expect("Could not parse input")
         - 1];
     format!(
-        "https://invidious.snopyta.org/watch?v={}",
+        "{}/watch?v={}",
+        cfg.instance,
         &selected_video.video_id
     )
 }
 
 /// Plays a video in the video player
-pub fn play(url: &str) {
-    // TODO: specify player in config or use xdg
+pub fn play(cfg: &Config, url: &str) {
     println!("Opening video, please wait...");
-    Command::new("mpv")
+    Command::new(&cfg.player)
         .arg(url)
         .output()
         .expect("Could not open MPV");

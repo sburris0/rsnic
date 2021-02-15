@@ -19,18 +19,18 @@ fn main() {
         )
         .get_matches();
 
+    let cfg: Config = confy::load("rsic").expect("Error loading configuration.");
+
     if let Some(query) = matches
         .subcommand_matches("search")
         .unwrap()
         .value_of("query")
     {
-        // TODO: move search url to search()
-        let req_url = format!("https://invidious.snopyta.org/api/v1/search?q={}", query);
         let videos: Vec<Video> =
-            search(&req_url).expect("An error occurred, no videos were found.");
-        print_videos(&videos).expect("Could not display videos");
+            search(&cfg, query).expect("An error occurred, no videos were found.");
+        print_videos(&cfg, &videos).expect("Could not display videos");
 
-        let selected_url = select_video(&videos);
-        play(&selected_url);
+        let selected_url = select_video(&cfg, &videos);
+        play(&cfg, &selected_url);
     }
 }
