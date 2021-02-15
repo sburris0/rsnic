@@ -1,5 +1,6 @@
 # rsnic
 ![GitHub](https://img.shields.io/github/license/sburris0/rsnic)
+
 **rsnic** (pronounced "arsenic") is the **R**u**S**t **N**eat **I**nvidious **C**lient.
 
 It is a CLI-frontend for [Invidious instances](https://invidio.us/).
