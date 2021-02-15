@@ -8,8 +8,7 @@ edition = "2018"
 
 [dependencies]
 clap = "*"
-ureq = { version = "*", features = ["json"] }
-serde = "*"
-serde_derive = "*"
+ureq = "*"
+serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 termion = "*"
