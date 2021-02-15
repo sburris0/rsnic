@@ -3,6 +3,8 @@
 
 It is a CLI-frontend for [Invidious instances](https://invidio.us/) released under the [ISC License](https://www.isc.org/licenses/) (MIT/2-clause BSD equivalent).
 
+![Screenshot](/docs/img/screenshot.png)
+
 ## Features
 - [x] Search and play videos with a media player of your choice
 - [ ] Search by uploader/channels
