@@ -11,6 +11,7 @@ use termion::{color, style};
 pub struct Config {
     instance: String,
     player: String,
+    player_args: Vec<String>,
     results: u8,
 }
 
@@ -19,6 +20,7 @@ impl std::default::Default for Config {
         Self {
             instance: "https://invidious.snopyta.org".to_string(),
             player: "mpv".to_string(),
+            player_args: Vec::new(),
             results: 20,
         }
     }
@@ -108,6 +110,7 @@ pub fn select_video(cfg: &Config, videos: &[Video]) -> String {
 pub fn play(cfg: &Config, url: &str) {
     println!("Opening video, please wait...");
     Command::new(&cfg.player)
+        .args(&cfg.player_args)
         .arg(url)
         .output()
         .expect("Could not open MPV");

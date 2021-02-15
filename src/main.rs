@@ -19,13 +19,11 @@ fn main() {
         )
         .get_matches();
 
-    let cfg: Config = confy::load("rsic").expect("Error loading configuration.");
+    let cfg: Config = confy::load("rsnic").expect("Error loading configuration.");
 
-    if let Some(query) = matches
-        .subcommand_matches("search")
-        .unwrap()
-        .value_of("query")
+    if let Some(ref matches) = matches.subcommand_matches("search")
     {
+        let query = matches.value_of("query").unwrap();
         let videos: Vec<Video> =
             search(&cfg, query).expect("An error occurred, no videos were found.");
         print_videos(&cfg, &videos).expect("Could not display videos");
