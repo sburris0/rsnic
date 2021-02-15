@@ -3,7 +3,7 @@ name = "rsnic"
 version = "0.1.0"
 authors = ["Spencer Burris <sburris@posteo.net>"]
 edition = "2018"
-description = "RuSt Nice Invidious Client - watch YouTube videos privately via CLI with the Invidious API"
+description = "RuSt Neat Invidious Client - watch YouTube videos privately via CLI with the Invidious API"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
