@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
+use std::error::Error;
 use std::fmt;
 use std::io::{self, Write};
-use std::error::Error;
 use std::process::Command;
 use termion::{color, style};
 
@@ -41,7 +41,13 @@ pub struct Video {
 
 impl fmt::Display for Video {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "\"{}\"", self.title)
+        let minutes = self.length_seconds / 60;
+        let seconds = self.length_seconds % 60;
+        write!(
+            f,
+            "\"{}\" ({}:{:0>2}) - {}",
+            self.title, minutes, seconds, self.author
+        )
     }
 }
 
@@ -61,13 +67,15 @@ pub fn print_videos(cfg: &Config, videos: &[Video]) -> Result<(), Box<dyn Error>
     let mut writer = io::BufWriter::new(io::stdout());
 
     writeln!(writer,
-        "{}{}Item\t Title{}",
+        "{}{}│Item\t Title\n├─────────────────────────────────────────────────────────────────────{}",
         style::Bold,
         color::Fg(color::Yellow),
         style::Reset
     )?;
     for (i, video) in videos.iter().enumerate() {
         if i < cfg.results as usize {
+            write!(writer, "{}│", color::Fg(color::Yellow))?;
+
             if i % 2 == 0 {
                 writeln!(writer, "{}{}\t{}", color::Fg(color::Green), i + 1, video)?;
             } else {
@@ -76,6 +84,13 @@ pub fn print_videos(cfg: &Config, videos: &[Video]) -> Result<(), Box<dyn Error>
         }
     }
 
+    writeln!(
+        writer,
+        "{}{}└─────────────────────────────────────────────────────────────────────{}",
+        style::Bold,
+        color::Fg(color::Yellow),
+        style::Reset
+    )?;
     writer.flush()?;
     Ok(())
 }
@@ -99,11 +114,7 @@ pub fn select_video(cfg: &Config, videos: &[Video]) -> String {
         .parse::<usize>()
         .expect("Could not parse input")
         - 1];
-    format!(
-        "{}/watch?v={}",
-        cfg.instance,
-        &selected_video.video_id
-    )
+    format!("{}/watch?v={}", cfg.instance, &selected_video.video_id)
 }
 
 /// Plays a video in the video player
@@ -130,6 +141,9 @@ mod tests {
         let results = search(&cfg, "Max Stirner Complete Works Audio Book").unwrap();
         let top_result = &results.first().unwrap();
         assert_eq!(top_result.video_id, "MmdB8R9sm4Y".to_string());
-        assert_eq!(top_result.title, "Max Stirner Complete Works Audio Book".to_string());
+        assert_eq!(
+            top_result.title,
+            "Max Stirner Complete Works Audio Book".to_string()
+        );
     }
 }
