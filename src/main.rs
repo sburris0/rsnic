@@ -8,9 +8,16 @@ use structopt::StructOpt;
     author = "Spencer B."
 )]
 enum Opt {
+    #[structopt(about = "Search for and play a video")]
     Play { query: String },
+
+    #[structopt(about = "Search for and download a video")]
     Download { query: String },
+
+    #[structopt(about = "Search for and subscribe to a channel")]
     Subscribe { query: String },
+
+    #[structopt(about = "List your subscriptions' videos")]
     List { query: String },
 }
 
