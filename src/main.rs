@@ -1,6 +1,4 @@
-mod lib;
-
-use crate::lib::*;
+use rsnic::*;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -17,7 +15,7 @@ enum Opt {
 }
 
 fn main() {
-    let cfg: Config = confy::load("rsnic").expect("Error loading configuration.");
+    let cfg: rsnic::Config = confy::load("rsnic").expect("Error loading configuration.");
     let opt = Opt::from_args();
     let mut videos: Vec<Video> = Vec::new();
 
@@ -25,7 +23,8 @@ fn main() {
     match opt {
         Opt::Play { query } => {
             videos.append(
-                &mut search(&cfg, &query).expect("An error occurred, no videos were found."),
+                &mut search::search(&cfg, &query)
+                    .expect("An error occurred, no videos were found."),
             );
         }
         _ => (),
@@ -34,6 +33,6 @@ fn main() {
     // Open
     // match opt { Download => download(), player => play() }...
     print_videos(&cfg, &videos).expect("Could not display videos");
-    let selected_url = select_video(&cfg, &videos);
+    let selected_url = prompt::select_video(&cfg, &videos);
     play(&cfg, &selected_url);
 }
