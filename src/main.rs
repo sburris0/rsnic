@@ -32,7 +32,7 @@ fn main() {
 
     // Open
     // match opt { Download => download(), player => play() }...
-    print_videos(&cfg, &videos).expect("Could not display videos");
+    println!("{}", VideoCollection(&videos));
     let selected_url = prompt::select_video(&cfg, &videos);
     play(&cfg, &selected_url);
 }
