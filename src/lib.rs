@@ -26,6 +26,7 @@ impl std::default::Default for Config {
     }
 }
 
+// TODO: ContentItem trait, impl Display for Vec<T: ContentItem>
 /// Video type that API responses are parsed into
 /// The Invidious API is documented [here](https://github.com/iv-org/documentation/blob/master/API.md).
 #[derive(Deserialize, Debug)]
