@@ -30,7 +30,7 @@ impl fmt::Display for Video {
     }
 }
 
-pub struct VideoCollection<'a>(pub &'a Vec<Video>);
+pub struct VideoCollection<'a>(pub &'a [Video]);
 
 impl fmt::Display for VideoCollection<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

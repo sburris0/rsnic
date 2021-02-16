@@ -32,7 +32,7 @@ fn main() {
 
     // Open
     // match opt { Download => download(), player => play() }...
-    println!("{}", VideoCollection(&videos));
+    println!("{}", VideoCollection(&videos[..cfg.results as usize]));
     let selected_url = prompt::select_video(&cfg, &videos);
     play(&cfg, &selected_url);
 }
