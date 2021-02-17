@@ -1,8 +1,13 @@
+use crate::config::Config;
 use serde::Deserialize;
-use termion::{color, style};
 use std::fmt;
+use std::process::Command;
+use termion::{color, style};
 
-trait ContentItem{}
+pub trait ContentItem {
+    fn play(&self, cfg: Config);
+    fn download(&self, cfg: Config);
+}
 
 // TODO: ContentItem trait, impl Display for Vec<T: ContentItem>
 /// Video type that API responses are parsed into
@@ -30,9 +35,24 @@ impl fmt::Display for Video {
     }
 }
 
-pub struct VideoCollection<'a>(pub &'a [Video]);
+impl ContentItem for Video {
+    fn play(&self, cfg: Config) {
+        println!("Opening video, please wait...");
+        Command::new(&cfg.player)
+            .args(&cfg.player_args)
+            .arg(format!("{}/watch?v={}", &cfg.instance, self.video_id))
+            .output()
+            .expect("Couldn't display a video");
+    }
+    fn download(&self, _cfg: Config) {
+        unimplemented!()
+    }
+}
 
-impl fmt::Display for VideoCollection<'_> {
+pub struct VideoCollection<'a>(pub &'a [Video]);
+pub struct Collection<'a, T: ContentItem>(pub &'a [T]);
+
+impl<T: ContentItem + fmt::Display> fmt::Display for Collection<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f,
             "{}{}│Item\t Title\n├─────────────────────────────────────────────────────────────────────{}",

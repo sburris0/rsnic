@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::invidious::Video;
+use crate::types::Video;
 use serde_json::from_str;
 use std::error::Error;
 
