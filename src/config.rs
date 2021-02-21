@@ -15,7 +15,7 @@ impl std::default::Default for Config {
             instance: "https://invidious.snopyta.org".to_string(),
             player: "mpv".to_string(),
             player_args: Vec::new(),
-            results: 20,
+            results: 19,
         }
     }
 }

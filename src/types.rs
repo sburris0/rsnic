@@ -3,56 +3,92 @@ use serde::Deserialize;
 use std::fmt;
 use std::process::Command;
 use termion::{color, style};
+use crate::timestamp::sec_to_hms;
 
-pub trait ContentItem {
-    fn play(&self, cfg: Config);
-    fn download(&self, cfg: Config);
-}
-
-// TODO: ContentItem trait, impl Display for Vec<T: ContentItem>
 /// Video type that API responses are parsed into
 /// The Invidious API is documented [here](https://github.com/iv-org/documentation/blob/master/API.md).
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct Video {
-    pub title: String,
-    pub video_id: String,
-    pub author: String,
-    pub description: String,
-    pub published: i64,
-    pub length_seconds: i32,
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase", tag = "type")]
+pub enum Content {
+    #[serde(rename_all = "camelCase")]
+    Video {
+        title: String,
+        video_id: String,
+        author: String,
+        description: String,
+        published: i64,
+        length_seconds: i32,
+        view_count: i64,
+    },
+    #[serde(rename_all = "camelCase")]
+    Channel {
+        author: String,
+        sub_count: i32,
+        video_count: i32,
+        description: String,
+    },
+    #[serde(rename_all = "camelCase")]
+    Playlist {
+        title: String,
+        playlist_id: String,
+        author: String,
+        video_count: i32,
+        // videos: Vec<Video>,
+    },
 }
 
-impl fmt::Display for Video {
+impl fmt::Display for Content {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let minutes = self.length_seconds / 60;
-        let seconds = self.length_seconds % 60;
-        write!(
-            f,
-            "\"{}\" ({}:{:0>2}) - {}",
-            self.title, minutes, seconds, self.author
-        )
+        match self {
+            Content::Video {
+                length_seconds,
+                author,
+                title,
+                ..
+            } => {
+                let timestamp = sec_to_hms(length_seconds);
+                write!(
+                    f,
+                    "\"{}\" ({}) - {}",
+                    title, timestamp, author
+                )
+            }
+            Content::Channel { author, .. } => {
+                write!(f, "CHANNEL: {}", author)
+            }
+            Content::Playlist { title, author, .. } => {
+                write!(f, "PlAYLIST: \"{}\" - {}", title, author)
+            }
+        }
     }
 }
 
-impl ContentItem for Video {
-    fn play(&self, cfg: Config) {
-        println!("Opening video, please wait...");
-        Command::new(&cfg.player)
-            .args(&cfg.player_args)
-            .arg(format!("{}/watch?v={}", &cfg.instance, self.video_id))
-            .output()
-            .expect("Couldn't display a video");
-    }
-    fn download(&self, _cfg: Config) {
-        unimplemented!()
+// TODO: play, download, subscribe traits
+// pub fn download(&self, _cfg: Config) {
+//     unimplemented!()
+// }
+
+impl Content {
+    pub fn play(&self, cfg: Config) {
+        match self {
+            Content::Video { video_id, .. } => {
+                println!("Opening video, please wait...");
+                Command::new(&cfg.player)
+                    .args(&cfg.player_args)
+                    .arg(format!("{}/watch?v={}", &cfg.instance, video_id))
+                    .output()
+                    .expect("Couldn't display a video");
+            }
+            _ => unimplemented!(),
+        }
     }
 }
 
-pub struct VideoCollection<'a>(pub &'a [Video]);
-pub struct Collection<'a, T: ContentItem>(pub &'a [T]);
+/// A collection of things Videos, Playlists, Channels
+pub struct Collection(pub Vec<Content>);
 
-impl<T: ContentItem + fmt::Display> fmt::Display for Collection<'_, T> {
+/// Collections display in a table
+impl fmt::Display for Collection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f,
             "{}{}│Item\t Title\n├─────────────────────────────────────────────────────────────────────{}",
@@ -60,13 +96,13 @@ impl<T: ContentItem + fmt::Display> fmt::Display for Collection<'_, T> {
             color::Fg(color::Yellow),
             style::Reset
         )?;
-        for (i, video) in self.0.iter().enumerate() {
+        for (i, item) in self.0.iter().enumerate() {
             write!(f, "{}│", color::Fg(color::Yellow))?;
 
             if i % 2 == 0 {
-                writeln!(f, "{}{}\t{}", color::Fg(color::Green), i + 1, video)?;
+                writeln!(f, "{}{}\t{}", color::Fg(color::Green), i + 1, item)?;
             } else {
-                writeln!(f, "{}{}\t{}", color::Fg(color::Blue), i + 1, video)?;
+                writeln!(f, "{}{}\t{}", color::Fg(color::Blue), i + 1, item)?;
             }
         }
 
@@ -79,6 +115,3 @@ impl<T: ContentItem + fmt::Display> fmt::Display for Collection<'_, T> {
         )
     }
 }
-
-pub struct Playlist;
-pub struct Channel;

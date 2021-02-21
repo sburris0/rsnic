@@ -1,10 +1,9 @@
-use crate::types::Video;
 use std::io::{self, Write};
 use termion::color;
 
-/// Selects a video
-pub fn select_video<'a>(videos: &'a [Video]) -> &'a Video {
-    let mut video_number = String::new();
+/// Prompts user to enter a number
+pub fn prompt_number() -> usize {
+    let mut number = String::new();
 
     print!(
         "{}\nItem: {}",
@@ -13,12 +12,11 @@ pub fn select_video<'a>(videos: &'a [Video]) -> &'a Video {
     );
     io::stdout().flush().expect("Could not flush output");
     io::stdin()
-        .read_line(&mut video_number)
+        .read_line(&mut number)
         .expect("Could not read input");
 
-    &videos[video_number
+    number
         .trim()
         .parse::<usize>()
-        .expect("Could not parse input")
-        - 1]
+        .expect("Could not parse input") - 1
 }
