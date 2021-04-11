@@ -47,13 +47,13 @@ impl fmt::Display for Content {
                 ..
             } => {
                 let timestamp = sec_to_hms(length_seconds);
-                write!(f, "\"{}\" ({}) - {}", title, timestamp, author)
+                write!(f, "“{}” ({}) ― {}", title, timestamp, author)
             }
             Content::Channel { author, .. } => {
                 write!(f, "CHANNEL: {}", author)
             }
             Content::Playlist { title, author, .. } => {
-                write!(f, "PLAYLIST: \"{}\" - {}", title, author)
+                write!(f, "PLAYLIST: “{}” ― {}", title, author)
             }
         }
     }
@@ -68,12 +68,12 @@ impl Content {
     pub fn play(&self, cfg: Config) {
         match self {
             Content::Video { video_id, .. } => {
-                println!("Opening video, please wait...");
+                println!("Opening video, please wait…");
                 Command::new(&cfg.player)
                     .args(&cfg.player_args)
                     .arg(format!("{}/watch?v={}", &cfg.instance, video_id))
                     .output()
-                    .expect("Couldn't display a video");
+                    .expect("Couldn’t display a video");
             }
             _ => unimplemented!(),
         }
