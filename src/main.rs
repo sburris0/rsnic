@@ -8,7 +8,7 @@ use structopt::StructOpt;
     author = "Spencer B."
 )]
 struct Opt {
-    #[structopt(required=true)]
+    #[structopt(required = true)]
     query: String,
 }
 
@@ -21,10 +21,16 @@ fn main() {
     println!("{}", Collection(results.clone()));
 
     // Open
-    let selected = &results[prompt::prompt_number()];
-    match selected {
-        // TODO: match opt { Download => download(), player => play() }...
-        Content::Video { .. } => selected.play(cfg),
-        _ => (),
+    loop {
+        if let Ok((_cmd, index)) = prompt::prompt() {
+            // index-1 to match non-zero indexed videos in list
+            let selected = &results[index - 1];
+            match selected {
+                // TODO: match opt { Download => download(), player => play() }...
+                Content::Video { .. } => selected.play(cfg),
+                _ => (),
+            }
+            break;
+        }
     }
 }

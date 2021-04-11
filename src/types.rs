@@ -1,9 +1,9 @@
 use crate::config::Config;
+use crate::timestamp::sec_to_hms;
 use serde::Deserialize;
 use std::fmt;
 use std::process::Command;
 use termion::{color, style};
-use crate::timestamp::sec_to_hms;
 
 /// Video type that API responses are parsed into
 /// The Invidious API is documented [here](https://github.com/iv-org/documentation/blob/master/API.md).
@@ -47,17 +47,13 @@ impl fmt::Display for Content {
                 ..
             } => {
                 let timestamp = sec_to_hms(length_seconds);
-                write!(
-                    f,
-                    "\"{}\" ({}) - {}",
-                    title, timestamp, author
-                )
+                write!(f, "\"{}\" ({}) - {}", title, timestamp, author)
             }
             Content::Channel { author, .. } => {
                 write!(f, "CHANNEL: {}", author)
             }
             Content::Playlist { title, author, .. } => {
-                write!(f, "PlAYLIST: \"{}\" - {}", title, author)
+                write!(f, "PLAYLIST: \"{}\" - {}", title, author)
             }
         }
     }

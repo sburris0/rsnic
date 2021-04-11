@@ -5,8 +5,7 @@ pub fn sec_to_hms(sec: &i32) -> String {
 
     if hours > 0 {
         format!("{}:{:0>2}:{:0>2}", hours, minutes, seconds)
-    }
-    else {
+    } else {
         format!("{}:{:0>2}", minutes, seconds)
     }
 }
