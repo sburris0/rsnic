@@ -12,8 +12,8 @@ pub struct Config {
 impl std::default::Default for Config {
     fn default() -> Self {
         Self {
-            instance: "https://invidious.snopyta.org".to_string(),
-            player: "mpv".to_string(),
+            instance: String::from("https://invidious.snopyta.org"),
+            player: String::from("mpv"),
             player_args: Vec::new(),
             results: 19,
         }
